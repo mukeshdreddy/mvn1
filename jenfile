@@ -1,0 +1,49 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('CD')
+        {
+            steps
+            {
+            git 'https://github.com/intelliqittrainings/maven.git'
+            }
+        }
+        
+        stage('cb')
+        {
+            steps
+            {
+             sh 'mvn package'
+            }
+        }
+        stage('cd')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: 'd2b47896-bd25-4d60-bcd9-58f70dc8eaec', path: '', url: 'http://172.31.29.177:8080')], contextPath: 'test1', war: '**/*.war'
+            }
+        }
+        stage('test')
+        {
+            steps
+            {
+                git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
+                sh 'java -jar /home/ubuntu/.jenkins/workspace/newDeclarativePipeline/testing.jar'
+            }
+        }
+        stage('delevery')
+        {
+            steps
+            {
+                input message: 'waing for the approval', submitter: 'kumar'
+                deploy adapters: [tomcat9(credentialsId: 'd2b47896-bd25-4d60-bcd9-58f70dc8eaec', path: '', url: 'http://172.31.29.236:8080')], contextPath: 'proddapp', war: '**/*.war'
+                
+            }
+        }
+    }
+    
+}
+
+
